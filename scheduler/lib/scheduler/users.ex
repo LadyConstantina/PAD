@@ -37,6 +37,8 @@ defmodule Scheduler.Users do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  def get_user_by!(name, password), do: Repo.get_by!(User,[full_name: name , password: password])
+
   @doc """
   Creates a user.
 

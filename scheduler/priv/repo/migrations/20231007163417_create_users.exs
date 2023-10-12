@@ -4,13 +4,14 @@ defmodule Scheduler.Repo.Migrations.CreateUsers do
   def change do
     create table(:users) do
       add :full_name, :string
-      add :gender, :string
-      add :account_id, references(:accounts, on_delete: :delete_all)
-      add :group_id, references(:groups, on_delete: :delete_all)
+      add :group, :string
+      add :university, :string
+      add :email, :string
+      add :password, :string
 
       timestamps()
     end
 
-    create index(:users, [:account_id, :group_id])
+    create index(:users, [:full_name, :password])
   end
 end
