@@ -4,9 +4,10 @@ defmodule Scheduler.Users.User do
 
   schema "users" do
     field :full_name, :string
-    field :gender, :string
-    belongs_to :account, Scheduler.Accounts.Account
-    belongs_to :group, Scheduler.Groups.Group
+    field :group, :string
+    field :university, :string
+    field :email, :string
+    field :password, :string
 
     timestamps()
   end
@@ -14,7 +15,8 @@ defmodule Scheduler.Users.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:account_id, :group_id, :full_name, :gender])
-    |> validate_required([:account_id,:group_id])
+    |> cast(attrs, [:email, :password, :full_name, :group, :university])
+    |> validate_required([:email, :password, :full_name, :group, :university])
+    |> unique_constraint([:email])
   end
 end

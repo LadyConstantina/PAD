@@ -19,7 +19,10 @@ defmodule SchedulerWeb.UserJSON do
     %{
       id: user.id,
       full_name: user.full_name,
-      gender: user.gender
+      group: user.group,
+      university: user.university,
+      email: user.email,
+      password: user.password
     }
   end
 end

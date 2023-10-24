@@ -11,6 +11,11 @@ defmodule SchedulerWeb.UserController do
     render(conn, :index, users: users)
   end
 
+  def login(conn, %{"user" => user_params}) do
+    user = Users.get_user_by!(user_params["full_name"], user_params["password"])
+    render(conn, :show, user: user)
+  end
+
   def create(conn, %{"user" => user_params}) do
     with {:ok, %User{} = user} <- Users.create_user(user_params) do
       conn
