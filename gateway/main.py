@@ -12,6 +12,11 @@ app = Flask(__name__)
 
 REGISTERED_APPS = {}
 
+
+def register():
+    response = requests.get('http://localhost:4010/', headers={"Content-type":"application/json","name":"Gateway"})
+    log.info(response)
+
 @app.route('/', methods=['GET'])
 def get_registered_services():
     service_name = request.headers.get("name")
@@ -19,17 +24,7 @@ def get_registered_services():
         REGISTERED_APPS[service_name] = {"host":request.remote_addr, "port":request.environ.get('REMOTE_PORT')}
     return json.dumps(REGISTERED_APPS)
 
-def monitor_services():
-    while True:
-        for service in REGISTERED_APPS.keys():
-            response = requests.get(f"{REGISTERED_APPS[service]['host']}:{REGISTERED_APPS[service]['port']}/heartbeat")
-            if response.status_code != 200:
-                REGISTERED_APPS.pop(service, None)
-                #log.info(REGISTERED_APPS)
-        time.sleep(10)
 
 if __name__ == "__main__":
-    monitor_thread = threading.Thread(target=monitor_services)
-    flask_thread = threading.Thread(target=app.run, kwargs={"host":'0.0.0.0', "port":4010, "debug":True})
-    monitor_thread.start()
-    flask_thread.start()
+    register()
+    app.run(host='0.0.0.0', port=4011, debug=True)
