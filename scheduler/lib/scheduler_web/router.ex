@@ -5,9 +5,12 @@ defmodule SchedulerWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/heartbeat", SchedulerWeb do
+    get "/", DefaultController, :index
+  end
+
   scope "/api", SchedulerWeb do
     pipe_through :api
-    get "/heartbeat", DefaultController, :index
     post "/register", UserController, :create
     post "/login", UserController, :login
     post "/schedule", SchedulerController, :create

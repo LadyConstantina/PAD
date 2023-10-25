@@ -14,17 +14,15 @@ REGISTERED_APPS = {}
 
 
 def register():
-    response = requests.get('http://localhost:4010/', headers={"Content-type":"application/json","name":"Gateway"})
-    log.info(response)
+    response = requests.get('http://localhost:4010/', headers={"Content-type":"application/json","name":"Gateway","host":"localhost","port":'4011'})
+    log.info(response.text)
 
-@app.route('/', methods=['GET'])
-def get_registered_services():
-    service_name = request.headers.get("name")
-    if service_name not in REGISTERED_APPS:
-        REGISTERED_APPS[service_name] = {"host":request.remote_addr, "port":request.environ.get('REMOTE_PORT')}
-    return json.dumps(REGISTERED_APPS)
+@app.route('/heartbeat', methods=['GET'])
+def heartbeat():
+    return json.dumps("alive")
+
 
 
 if __name__ == "__main__":
     register()
-    app.run(host='0.0.0.0', port=4011, debug=True)
+    app.run(host='localhost', port=4011, debug=True)
