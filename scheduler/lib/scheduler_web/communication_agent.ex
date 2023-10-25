@@ -3,10 +3,27 @@ defmodule SchedulerWeb.CommunicationAgent do
     require Logger
 
     def start_link(_args) do
-        Agent.start_link(fn -> :ok end, name: __MODULE__)
+        state = get_to_service_discovery()
+        Logger.info(state)
+        Agent.start_link(fn -> state end, name: __MODULE__)
     end
 
     def get_to_service_discovery() do
-        # to be implemented
+        state = 
+        case HTTPoison.get("http://localhost:4010/", [{'name','Scheduler'}, {'host','localhost'}, {'port','4000'}]) do
+            {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> Jason.decode!(body)
+            {:ok, %HTTPoison.Response{status_code: status_code, body: body}} -> "Request failed with status code #{status_code}: #{body}"
+            {:error, %HTTPoison.Error{reason: reason}} -> "Request failed with error: #{reason}"
+        end
+        if state["Scheduler"] == nil do get_to_service_discovery() end
+        state
+    end
+
+    def get_address(service) do
+        services = Agent.get(__MODULE__,& &1)
+        case services[service] do
+            nil -> {:error,"Service does not exist."}
+            _ -> {:ok, services[service]}
+        end
     end
 end
