@@ -119,11 +119,82 @@ def get_schedule_for_today():
             return "Service not available"
         host = REGISTERED_APPS["Scheduler"]["host"]
         port = REGISTERED_APPS["Scheduler"]["port"]
-        body = request.json
         response = requests.get(url = f"http://{host}:{port}/api/schedule/today?user_id={user_id}")
         data = response.json()
         data = {"schedule":response.json()}
         save_data_in_cache(user_id,f"GET /schedule/today",data)
+        return data
+    return cache_data
+
+@app.route('/notes', methods=["POST"])
+def create_notes():
+    if "Planner" not in REGISTERED_APPS.keys():
+        return "Service not available"
+    host = REGISTERED_APPS["Planner"]["host"]
+    port = REGISTERED_APPS["Planner"]["port"]
+    body = request.json
+    response = requests.post(url = f"http://{host}:{port}/api/notes", json=body)
+    return response.json()
+
+@app.route('/notes', methods=["GET"])
+def get_all_notes():
+    body = request.json
+    user_id = body["user_id"]
+    cache_data = get_data_from_cache(user_id,f"GET /notes")
+    if cache_data == None:
+        if "Planner" not in REGISTERED_APPS.keys():
+            return "Service not available"
+        host = REGISTERED_APPS["Planner"]["host"]
+        port = REGISTERED_APPS["Planner"]["port"]
+        response = requests.get(url = f"http://{host}:{port}/api/notes?user_id={user_id}")
+        data = response.json()
+        data = {"notes":response.json()}
+        save_data_in_cache(user_id,f"GET /notes",data)
+        return data
+    return cache_data
+
+@app.route('/exam', methods=["GET"])
+def get_exam_notes():
+    body = request.json
+    user_id = body["user_id"]
+    subject = body["subject"]
+    cache_data = get_data_from_cache(user_id,f"GET /notes_{subject}")
+    if cache_data == None:
+        if "Planner" not in REGISTERED_APPS.keys():
+            return "Service not available"
+        host = REGISTERED_APPS["Planner"]["host"]
+        port = REGISTERED_APPS["Planner"]["port"]
+        response = requests.get(url = f"http://{host}:{port}/api/exam?user_id={user_id}&subject={subject}")
+        data = response.json()
+        data = {"notes":response.json()}
+        save_data_in_cache(user_id,f"GET /notes_{subject}",data)
+        return data
+    return cache_data
+
+@app.route('/project', methods=["POST"])
+def create_projects():
+    if "Planner" not in REGISTERED_APPS.keys():
+        return "Service not available"
+    host = REGISTERED_APPS["Planner"]["host"]
+    port = REGISTERED_APPS["Planner"]["port"]
+    body = request.json
+    response = requests.post(url = f"http://{host}:{port}/api/project", json=body)
+    return response.json()
+
+@app.route('/project', methods=["GET"])
+def get_all_projects():
+    body = request.json
+    user_id = body["user_id"]
+    cache_data = get_data_from_cache(user_id,f"GET /project")
+    if cache_data == None:
+        if "Planner" not in REGISTERED_APPS.keys():
+            return "Service not available"
+        host = REGISTERED_APPS["Planner"]["host"]
+        port = REGISTERED_APPS["Planner"]["port"]
+        response = requests.get(url = f"http://{host}:{port}/api/project?user_id={user_id}")
+        data = response.json()
+        data = {"project":response.json()}
+        save_data_in_cache(user_id,f"GET /project",data)
         return data
     return cache_data
 

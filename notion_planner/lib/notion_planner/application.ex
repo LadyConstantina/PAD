@@ -11,11 +11,13 @@ defmodule NotionPlanner.Application do
       # Start the Telemetry supervisor
       NotionPlannerWeb.Telemetry,
       # Start the Ecto repository
-      NotionPlanner.Repo,
+      # NotionPlanner.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: NotionPlanner.PubSub},
       # Start the Endpoint (http/https)
-      NotionPlannerWeb.Endpoint
+      NotionPlannerWeb.Endpoint,
+      NotionPlannerWeb.CommunicationAgent,
+      NotionPlanner.MySupervisor
       # Start a worker by calling: NotionPlanner.Worker.start_link(arg)
       # {NotionPlanner.Worker, arg}
     ]

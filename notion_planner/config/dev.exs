@@ -1,14 +1,14 @@
 import Config
 
 # Configure your database
-config :notion_planner, NotionPlanner.Repo,
-  username: "pad_admin",
-  password: "padpostgres",
-  hostname: "localhost",
-  database: "notion_planner_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+# config :notion_planner, NotionPlanner.Repo,
+#   username: "pad_admin",
+#   password: "padpostgres",
+#   hostname: "localhost",
+#   database: "notion_planner_dev",
+#   stacktrace: true,
+#   show_sensitive_data_on_connection_error: true,
+#   pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

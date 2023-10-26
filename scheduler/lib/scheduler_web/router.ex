@@ -23,9 +23,8 @@ defmodule SchedulerWeb.Router do
     delete "/schedule", LessonController, :delete
     get "/schedule/day", LessonController, :get_for_day
     get "/schedule/today", LessonController, :get_for_today
-    # post "/deadlines/create", SchedulerController, :create_projects
-    # get "deadlines", SchedulerController, :get_projects
-    # post "deadlines", SchedulerController, :update_projects
-    # get "/deadlines/week", SchedulerController, :get_week_projects
+    post "/deadlines", SchedulerController, :create_projects
+    get "/deadlines", SchedulerController, :get_projects
+    put "/deadlines", SchedulerController, :update_projects
   end
 end
