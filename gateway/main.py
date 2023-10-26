@@ -1,8 +1,6 @@
 from flask import Flask, request, json
 import requests
-import time
 import logging
-import threading
 from pymemcache.client import base
 
 log_format = "%(asctime)s - [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"

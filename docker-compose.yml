@@ -1,0 +1,49 @@
+service:
+  pad_db:
+    image: postgres:lates
+    container_name: pad_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pad_admin
+      POSTGRES_PASSWORD: padpostgres
+      POSTGRES_DB: scheduler_dev
+  cache:
+    image: memcached:latest
+    container_name: pad_cache
+    ports:
+      - "0.0.0.0:4012"
+  
+  service_discovery:
+    image: service_dicovery:latest
+    container_name: service_dicovery
+    ports:
+      - "0.0.0.0:4010"
+
+  scheduler:
+    image: scheduler:latest
+    container_name: scheduler
+    ports:
+      - "0.0.0.0:4000"
+    depends_on:
+      - pad_db
+      - service_dicovery
+
+  notion_planner:
+    image: notion_planner:latest
+    container_name: notion_planner
+    ports:
+      - "0.0.0.0:4002"
+    depends_on:
+      - service_dicovery
+
+  gateway:
+    image: gateway:latest
+    container_name: gateway
+    ports:
+      - "0.0.0.0:4011"
+    depends_on:
+      - cache
+      - service_dicovery
+      - scheduler
+      - notion_planner
