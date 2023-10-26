@@ -1,0 +1,386 @@
+{
+	"info": {
+		"_postman_id": "427811a8-1359-4305-8599-58aada8ad3ef",
+		"name": "PAD_lab1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23286728"
+	},
+	"item": [
+		{
+			"name": "register user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user\":    {\r\n        \"email\":\"constantina.gilca@isa.utm.md\",\r\n        \"password\":\"lovely\",\r\n        \"full_name\":\"Constantina Gilca\",\r\n        \"gender\":\"F\",\r\n        \"university\":\"UTM\",\r\n        \"group\":\"FAF-202\"\r\n        }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/api/register",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "log in",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user\":{\r\n        \"full_name\":\"Constantina Gilca\",\r\n        \"password\":\"lovely\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4010/login",
+					"host": [
+						"localhost"
+					],
+					"port": "4010",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST schedule",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"schedule\":{\r\n        \"monday\":{\r\n            \"11:30\":[\"PAD lecture\",\"Gavrilita Mihai\",\"3-409\"],\r\n            \"13:30\":[\"FIA lecture\",\"Gavrilita Mihai\",\"3-310\"],\r\n            \"even_week\":{\r\n                \"15:15\":[\"PAD seminar\",\"Gavrilita Mihai\",\"3-118\"]\r\n            },\r\n            \"odd_week\":null\r\n        },\r\n        \"tuesday\":{\r\n            \"15:15\":[\"Licenta lecture\",\"Drumea Vasile\",\"3-104\"],\r\n            \"17:00\":[\"Licenta lecture\",\"Drumea Vasile\",\"3-104\"],\r\n            \"odd_week\":null,\r\n            \"even_week\":null\r\n        },\r\n        \"wednesday\":{\r\n            \"13:30\":[\"Project Managment lecture\",\"Elena Rusu\",\"3-409\"],\r\n            \"15:15\":[\"Project Managment lab\",\"Elena Rusu\",\"3-113\"],\r\n            \"17:00\":[\"Project Managment seminar\",\"Elena Rusu\",\"3-113\"],\r\n            \"odd_week\":null,\r\n            \"even_week\":null\r\n        },\r\n        \"thursday\":{\r\n            \"11:30\":[\"FIA seminar\",\"Marusic Maria\",\"online\"],\r\n            \"13:30\":[\"FIA lab\",\"Marusic Maria\",\"online\"],\r\n            \"15:15\":[\"PAD lab\",\"Max Voloshenco\",\"3-409\"],\r\n            \"odd_week\":null,\r\n            \"even_week\":null\r\n        },\r\n        \"friday\":{\r\n            \"11:30\":[\"QA lecture\",\"\",\"\"],\r\n            \"13:30\":[\"QA seminar\",\"\",\"\"],\r\n            \"odd_week\":{\r\n                \"15:15\":[\"QA lab\",\"\",\"\"]\r\n            },\r\n            \"even_week\":null\r\n        }\r\n    },\r\n    \"user_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4011/schedule",
+					"host": [
+						"localhost"
+					],
+					"port": "4011",
+					"path": [
+						"schedule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST project",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"project\":{\r\n        \"MSP\":{\"Description\":\"Microservices Lab\",\"deadline\":\"26.10.2023\"}\r\n    },\r\n    \"user_id\":\"1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4011/project",
+					"host": [
+						"localhost"
+					],
+					"port": "4011",
+					"path": [
+						"project"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST notes",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"notes\":{\r\n        \"FIA\":[\"Hello darkness my old friend\"]\r\n    },\r\n    \"user_id\":\"1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4011/notes",
+					"host": [
+						"localhost"
+					],
+					"port": "4011",
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET schedule",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user_id",
+						"value": "1",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4011/schedule",
+					"host": [
+						"localhost"
+					],
+					"port": "4011",
+					"path": [
+						"schedule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET project",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user_id",
+						"value": "1",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4011/project",
+					"host": [
+						"localhost"
+					],
+					"port": "4011",
+					"path": [
+						"project"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET notes",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user_id",
+						"value": "1",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4011/notes",
+					"host": [
+						"localhost"
+					],
+					"port": "4011",
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET exam",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user_id",
+						"value": "1",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4002/api/exam?user_id=1&subject=FIA",
+					"host": [
+						"localhost"
+					],
+					"port": "4002",
+					"path": [
+						"api",
+						"exam"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "1"
+						},
+						{
+							"key": "subject",
+							"value": "FIA"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET schedule day",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user_id",
+						"value": "1",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_id\":1,\r\n    \"day\": \"thursday\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4011/schedule/day",
+					"host": [
+						"localhost"
+					],
+					"port": "4011",
+					"path": [
+						"schedule",
+						"day"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET schedule today",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user_id",
+						"value": "1",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_id\":1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4011/schedule/today",
+					"host": [
+						"localhost"
+					],
+					"port": "4011",
+					"path": [
+						"schedule",
+						"today"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
