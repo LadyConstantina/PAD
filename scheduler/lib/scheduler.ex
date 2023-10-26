@@ -31,19 +31,19 @@ defmodule Scheduler.LoadBalancer do
         {:ok, value}
     end
 
-    def handle_info({:new_schedule, data, user_id}, state) do
-        send(Scheduler.LoadBalancer,{:schedule,"monday", data["monday"], user_id})
-        send(Scheduler.LoadBalancer,{:schedule,"tuesday", data["tuesday"], user_id})
-        send(Scheduler.LoadBalancer,{:schedule,"wednesday", data["wednesday"], user_id})
-        send(Scheduler.LoadBalancer,{:schedule,"thursday", data["thursday"], user_id})
-        send(Scheduler.LoadBalancer,{:schedule,"friday", data["friday"], user_id})
+    def handle_cast({:new_schedule, data, user_id}, state) do
+        GenServer.cast(Scheduler.LoadBalancer,{:schedule,"monday", data["monday"], user_id})
+        GenServer.cast(Scheduler.LoadBalancer,{:schedule,"tuesday", data["tuesday"], user_id})
+        GenServer.cast(Scheduler.LoadBalancer,{:schedule,"wednesday", data["wednesday"], user_id})
+        GenServer.cast(Scheduler.LoadBalancer,{:schedule,"thursday", data["thursday"], user_id})
+        GenServer.cast(Scheduler.LoadBalancer,{:schedule,"friday", data["friday"], user_id})
         {:noreply,state}
     end
 
-    def handle_info({:schedule, day, data, user_id}, state) do
+    def handle_cast({:schedule, day, data, user_id}, state) do
         id = rem(state + 1, 3) + 1
         worker = :"scheduler#{id}"
-        send(worker,{:schedule, day, data, user_id})
+        GenServer.cast(worker,{:schedule, day, data, user_id})
         {:noreply,state+1}
     end
 
@@ -62,7 +62,7 @@ defmodule Scheduler.SchedulerWorker do
         {:ok, name}
     end
 
-    def handle_info({:schedule, day, data, user_id}, state) do
+    def handle_cast({:schedule, day, data, user_id}, state) do
         Map.keys(data) -- ["even_week", "odd_week"]
         |> Enum.map(fn key -> %{user_id: user_id, day: day, time: key, lesson: Enum.fetch!(data[key],0), teacher: Enum.fetch!(data[key],1), classroom: Enum.fetch!(data[key],2)} end)
         |> Enum.map(fn lesson_obj -> Scheduler.Lessons.create_lesson(lesson_obj) end)

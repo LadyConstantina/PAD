@@ -5,9 +5,16 @@ defmodule SchedulerWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/heartbeat", SchedulerWeb do
+    get "/", DefaultController, :index
+  end
+
+  scope "/new_service", SchedulerWeb do
+    post "/", DefaultController, :update
+  end
+
   scope "/api", SchedulerWeb do
     pipe_through :api
-    get "/heartbeat", DefaultController, :index
     post "/register", UserController, :create
     post "/login", UserController, :login
     post "/schedule", SchedulerController, :create
@@ -16,9 +23,8 @@ defmodule SchedulerWeb.Router do
     delete "/schedule", LessonController, :delete
     get "/schedule/day", LessonController, :get_for_day
     get "/schedule/today", LessonController, :get_for_today
-    # post "/deadlines/create", SchedulerController, :create_projects
-    # get "deadlines", SchedulerController, :get_projects
-    # post "deadlines", SchedulerController, :update_projects
-    # get "/deadlines/week", SchedulerController, :get_week_projects
+    post "/deadlines", SchedulerController, :create_projects
+    get "/deadlines", SchedulerController, :get_projects
+    put "/deadlines", SchedulerController, :update_projects
   end
 end

@@ -1,5 +1,6 @@
 defmodule SchedulerWeb.UserController do
   use SchedulerWeb, :controller
+  require Logger
 
   alias Scheduler.Users
   alias Scheduler.Users.User
@@ -17,6 +18,8 @@ defmodule SchedulerWeb.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
+    Logger.info(user_params)
+    #user_params = data["user"]
     with {:ok, %User{} = user} <- Users.create_user(user_params) do
       conn
       |> put_status(:created)

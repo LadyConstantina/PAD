@@ -1,4 +1,4 @@
-defmodule SchedulerWeb.CommunicationAgent do
+defmodule NotionPlannerWeb.CommunicationAgent do
     use Agent
     require Logger
 
@@ -10,12 +10,12 @@ defmodule SchedulerWeb.CommunicationAgent do
 
     def get_to_service_discovery() do
         state = 
-        case HTTPoison.get("http://localhost:4010/", [{'name','Scheduler'}, {'host','localhost'}, {'port','4000'}]) do
+        case HTTPoison.get("http://localhost:4010/", [{'name','Planner'}, {'host','localhost'}, {'port','4002'}]) do
             {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> Jason.decode!(body)
-            {:ok, %HTTPoison.Response{status_code: status_code, body: body}} -> "Request failed with status code #{status_code}: #{body}"
-            {:error, %HTTPoison.Error{reason: reason}} -> "Request failed with error: #{reason}"
+            {:ok, %HTTPoison.Response{status_code: status_code, body: body}} -> ["Request failed with status code #{status_code}: #{body}"]
+            {:error, %HTTPoison.Error{reason: reason}} -> ["Request failed with error: #{reason}"]
         end
-        if Enum.member?(state,"Scheduler") do get_to_service_discovery() end
+        if Enum.member?(state,"Planner") do get_to_service_discovery() end
         state
     end
 
