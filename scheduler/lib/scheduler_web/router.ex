@@ -9,6 +9,10 @@ defmodule SchedulerWeb.Router do
     get "/", DefaultController, :index
   end
 
+  scope "/new_service", SchedulerWeb do
+    post "/", DefaultController, :update
+  end
+
   scope "/api", SchedulerWeb do
     pipe_through :api
     post "/register", UserController, :create

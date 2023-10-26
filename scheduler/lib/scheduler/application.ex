@@ -16,10 +16,9 @@ defmodule Scheduler.Application do
       {Phoenix.PubSub, name: Scheduler.PubSub},
       # Start the Endpoint (http/https)
       SchedulerWeb.Endpoint,
+      SchedulerWeb.CommunicationAgent,
       # Start Worker pool through Worker Supervisor
-      Scheduler.WorkSupervisor,
-      # Start the Communication Agent
-      SchedulerWeb.CommunicationAgent
+      Scheduler.WorkSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

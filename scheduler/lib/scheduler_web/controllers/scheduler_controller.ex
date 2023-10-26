@@ -2,8 +2,8 @@ defmodule SchedulerWeb.SchedulerController do
     use SchedulerWeb, :controller
 
     def create(conn, %{"schedule" => data, "user_id" => user_id}) do
-        send(Scheduler.LoadBalancer,{:new_schedule, data, user_id})
-        send_resp(conn, :created, "Lessons created succesfully!")
+        GenServer.cast(Scheduler.LoadBalancer,{:new_schedule, data, user_id})
+        send_resp(conn, :ok, Jason.encode!("Lessons created succesfully!"))
     end
 
     def get(conn, %{"user_id" => user_id}) do

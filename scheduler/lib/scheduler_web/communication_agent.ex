@@ -15,7 +15,7 @@ defmodule SchedulerWeb.CommunicationAgent do
             {:ok, %HTTPoison.Response{status_code: status_code, body: body}} -> "Request failed with status code #{status_code}: #{body}"
             {:error, %HTTPoison.Error{reason: reason}} -> "Request failed with error: #{reason}"
         end
-        if state["Scheduler"] == nil do get_to_service_discovery() end
+        if Enum.member?(state,"Scheduler") do get_to_service_discovery() end
         state
     end
 
@@ -25,5 +25,9 @@ defmodule SchedulerWeb.CommunicationAgent do
             nil -> {:error,"Service does not exist."}
             _ -> {:ok, services[service]}
         end
+    end
+
+    def update(%{"_json" => new_state}) do
+        Agent.update(__MODULE__, fn state -> Jason.decode!(new_state) end)
     end
 end
