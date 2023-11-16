@@ -19,13 +19,15 @@ CACHE_REGISTRY = {
     3: cache_3
 }
 
+NR_OF_CACHE_SERVICES_AVAILABLE = len(CACHE_REGISTRY.keys())
+
 def register():
     requests.get('http://localhost:4010/', headers={"Content-type":"application/json","name":"Cache Leader","host":"localhost","port":'4020'})
 
 
 def get_cache_service(key):
-    cache_int = abs(hash(key)) % 3 + 1
-    cache_next_int = cache_int + 1 % 3 + 1
+    cache_int = abs(hash(key)) % NR_OF_CACHE_SERVICES_AVAILABLE + 1
+    cache_next_int = cache_int + 1 % NR_OF_CACHE_SERVICES_AVAILABLE + 1
     return (CACHE_REGISTRY[cache_int],CACHE_REGISTRY[cache_next_int])
 
 def get_data_from_cache(user_id, request):
@@ -35,6 +37,7 @@ def get_data_from_cache(user_id, request):
         data = cache_service_1.get(key)
     except:
         log.info(f"Cache {cache_service_1} unavailable. Trying cache {cache_service_2}")
+        NR_OF_CACHE_SERVICES_AVAILABLE -= 1
         data = cache_service_2.get(key)
     return data
 
@@ -45,6 +48,7 @@ def save_data_in_cache(user_id,request,data):
         cache_service_1.set(key, data)
     except:
         log.info(f"Cache {cache_service_1} unavailable. Trying cache {cache_service_2}")
+        NR_OF_CACHE_SERVICES_AVAILABLE -= 1
         cache_service_2.set(key, data)
     return "ok"
 
