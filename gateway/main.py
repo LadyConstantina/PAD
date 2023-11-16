@@ -1,7 +1,6 @@
 from flask import Flask, request, json
 import requests
 import logging
-from pymemcache.client import base
 
 log_format = "%(asctime)s - [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 logging.basicConfig(format=log_format, level=logging.INFO)
@@ -10,17 +9,6 @@ log = logging.getLogger(__name__)
 app = Flask(__name__)
 
 REGISTERED_APPS = dict()
-
-cache = base.Client(('localhost',4012))
-
-def get_data_from_cache(user_id, request):
-    key = f"{request} for {user_id}".replace(" ","_")
-    data = cache.get(key)
-    return data
-
-def save_data_in_cache(user_id,request,data):
-    key = f"{request} for {user_id}".replace(" ","_")
-    cache.set(key, data)
 
 def register():
     response = requests.get('http://localhost:4010/', headers={"Content-type":"application/json","name":"Gateway","host":"localhost","port":'4011'})
@@ -76,7 +64,9 @@ def create_schedule():
 def get_schedule():
     body = request.json
     user_id = body["user_id"]
-    cache_data = get_data_from_cache(user_id,"GET /schedule")
+    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
+    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /schedule"}))
     if cache_data == None:
         if "Scheduler" not in REGISTERED_APPS.keys():
             return "Service not available"
@@ -85,7 +75,7 @@ def get_schedule():
         response = requests.get(url = f"http://{host}:{port}/api/schedule?user_id={user_id}")
         data = response.json()
         data = {"schedule":response.json()}
-        save_data_in_cache(user_id,"GET /schedule",data)
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /schedule","data":data}))
         return data
     return cache_data
 
@@ -94,7 +84,9 @@ def get_schedule_for_day():
     body = request.json
     user_id = body["user_id"]
     day = body["day"]
-    cache_data = get_data_from_cache(user_id,f"GET /schedule/day_{day}")
+    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
+    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":f"GET /schedule/day_{day}"}))
     if cache_data == None:
         if "Scheduler" not in REGISTERED_APPS.keys():
             return "Service not available"
@@ -103,7 +95,7 @@ def get_schedule_for_day():
         response = requests.get(url = f"http://{host}:{port}/api/schedule/day?user_id={user_id}&day={day}")
         data = response.json()
         data = {"schedule":response.json()}
-        save_data_in_cache(user_id,f"GET /schedule/day_{day}",data)
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":f"GET /schedule/day_{day}","data":data}))
         return data
     return cache_data
 
@@ -111,7 +103,9 @@ def get_schedule_for_day():
 def get_schedule_for_today():
     body = request.json
     user_id = body["user_id"]
-    cache_data = get_data_from_cache(user_id,f"GET /schedule/today")
+    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
+    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /schedule/today"}))
     if cache_data == None:
         if "Scheduler" not in REGISTERED_APPS.keys():
             return "Service not available"
@@ -120,7 +114,7 @@ def get_schedule_for_today():
         response = requests.get(url = f"http://{host}:{port}/api/schedule/today?user_id={user_id}")
         data = response.json()
         data = {"schedule":response.json()}
-        save_data_in_cache(user_id,f"GET /schedule/today",data)
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /schedule/today","data":data}))
         return data
     return cache_data
 
@@ -138,7 +132,9 @@ def create_notes():
 def get_all_notes():
     body = request.json
     user_id = body["user_id"]
-    cache_data = get_data_from_cache(user_id,f"GET /notes")
+    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
+    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /notes"}))
     if cache_data == None:
         if "Planner" not in REGISTERED_APPS.keys():
             return "Service not available"
@@ -147,7 +143,7 @@ def get_all_notes():
         response = requests.get(url = f"http://{host}:{port}/api/notes?user_id={user_id}")
         data = response.json()
         data = {"notes":response.json()}
-        save_data_in_cache(user_id,f"GET /notes",data)
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /notes","data":data}))
         return data
     return cache_data
 
@@ -156,7 +152,9 @@ def get_exam_notes():
     body = request.json
     user_id = body["user_id"]
     subject = body["subject"]
-    cache_data = get_data_from_cache(user_id,f"GET /notes_{subject}")
+    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
+    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":f"GET /notes_{subject}"}))
     if cache_data == None:
         if "Planner" not in REGISTERED_APPS.keys():
             return "Service not available"
@@ -165,7 +163,7 @@ def get_exam_notes():
         response = requests.get(url = f"http://{host}:{port}/api/exam?user_id={user_id}&subject={subject}")
         data = response.json()
         data = {"notes":response.json()}
-        save_data_in_cache(user_id,f"GET /notes_{subject}",data)
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":f"GET /notes_{subject}","data":data}))
         return data
     return cache_data
 
@@ -183,7 +181,9 @@ def create_projects():
 def get_all_projects():
     body = request.json
     user_id = body["user_id"]
-    cache_data = get_data_from_cache(user_id,f"GET /project")
+    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
+    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /project"}))
     if cache_data == None:
         if "Planner" not in REGISTERED_APPS.keys():
             return "Service not available"
@@ -192,7 +192,7 @@ def get_all_projects():
         response = requests.get(url = f"http://{host}:{port}/api/project?user_id={user_id}")
         data = response.json()
         data = {"project":response.json()}
-        save_data_in_cache(user_id,f"GET /project",data)
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /project","data":data}))
         return data
     return cache_data
 
