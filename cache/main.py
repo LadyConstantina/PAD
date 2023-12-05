@@ -44,12 +44,8 @@ def get_data_from_cache(user_id, request):
 def save_data_in_cache(user_id,request,data):
     key = f"{request} for {user_id}".replace(" ","_")
     cache_service_1, cache_service_2 = get_cache_service(key)
-    try:
-        cache_service_1.set(key, data)
-    except:
-        log.info(f"Cache {cache_service_1} unavailable. Trying cache {cache_service_2}")
-        NR_OF_CACHE_SERVICES_AVAILABLE -= 1
-        cache_service_2.set(key, data)
+    cache_service_1.set(key, data, expire = 60)
+    cache_service_2.set(key, data, expire = 60)
     return "ok"
 
 @app.route('/', methods=['GET'])

@@ -13,6 +13,7 @@ defmodule SchedulerWeb.LessonController do
   end
 
   def get(conn, %{"user_id" => user_id}) do
+      Process.sleep(10)
       lessons = 
       Lessons.get_lesson_by_user!(user_id)
       |> Enum.map(fn {id, day, time, teacher, lesson, classroom} -> %{lessons_id: id, day: day, time: time, lesson: lesson, teacher: teacher, classroom: classroom} end)

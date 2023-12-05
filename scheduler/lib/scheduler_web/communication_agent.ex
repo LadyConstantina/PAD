@@ -10,7 +10,7 @@ defmodule SchedulerWeb.CommunicationAgent do
 
     def get_to_service_discovery() do
         state = 
-        case HTTPoison.get("http://localhost:4010/", [{'name','Scheduler'}, {'host','localhost'}, {'port','4000'}]) do
+        case HTTPoison.get("http://localhost:4010/", [{'name','Scheduler'}, {'host','localhost'}, {'port',System.get_env("PORT")}]) do
             {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> Jason.decode!(body)
             {:ok, %HTTPoison.Response{status_code: status_code, body: body}} -> "Request failed with status code #{status_code}: #{body}"
             {:error, %HTTPoison.Error{reason: reason}} -> "Request failed with error: #{reason}"

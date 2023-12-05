@@ -20,8 +20,10 @@ def get_registered_services():
     if service_name not in REGISTERED_APPS:
         for service in REGISTERED_APPS.keys():
             requests.post(f"http://{REGISTERED_APPS[service]['host']}:{REGISTERED_APPS[service]['port']}/new_service", json=json.dumps(REGISTERED_APPS))
-        REGISTERED_APPS[service_name] = {"host":request.headers.get("host"), "port":request.headers.get("port")}
+        REGISTERED_APPS[service_name] = [{"host":request.headers.get("host"), "port":request.headers.get("port")}]
         log.info(REGISTERED_APPS)
+    else:
+        REGISTERED_APPS[service_name].append({"host":request.headers.get("host"), "port":request.headers.get("port")})
     REGISTRATION_LOCK.release()
     return json.dumps(REGISTERED_APPS)
 
@@ -31,12 +33,14 @@ def monitor_services():
         REGISTRATION_LOCK.acquire()
         services = REGISTERED_APPS.keys()
         for service in services:
-            log.info(f"Thread in for: {service}")
-            try: 
-                requests.get(f"http://{REGISTERED_APPS[service]['host']}:{REGISTERED_APPS[service]['port']}/heartbeat")
-            except:
-                service_down.append(service)
-        [REGISTERED_APPS.pop(service, None) for service in service_down]
+            for replica in REGISTERED_APPS[service]:
+                log.info(f"Thread in for: {service}")
+                try: 
+                    requests.get(f"http://{replica['host']}:{replica['port']}/heartbeat")
+                except:
+                    service_down.append([service, replica])
+        [REGISTERED_APPS[service].remove(replica) for service, replica in service_down]
+        [REGISTERED_APPS.pop(service, None) for service, _ in service_down if len(REGISTERED_APPS[service]) == 0 ]
         log.info(REGISTERED_APPS)
         REGISTRATION_LOCK.release()
         time.sleep(10)
