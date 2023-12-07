@@ -184,8 +184,8 @@ def saga_transaction_for_project():
         if response_2.status_code == 200:
             return f"Transaction successful! \n result request 1: {response_1.content} \n result request 1: {response_2.content}"
         else:
-            response_3 = delete_routing_agent("api/lesson", response_1.json, "Scheduler")
-            return response_3.content
+            response_3 = delete_routing_agent("api/lesson", response_1.json(), "Scheduler")
+            return "Transaction aborted due to service unavailable."
     return response_1.content
 
 @app.before_first_request
