@@ -16,14 +16,22 @@ REGISTRATION_LOCK = threading.Lock()
 @app.route('/', methods=['GET'])
 def get_registered_services():
     service_name = request.headers.get("name")
+    log.info(f"Got request to register from {service_name}")
+    for service in REGISTERED_APPS.keys():
+        log.info(f"There is a service {service}")
+        for replica in REGISTERED_APPS[service]:
+            log.info(f"There is a replica {replica}")
+            requests.post(f"http://{replica['host']}:{replica['port']}/new_service", json=json.dumps(REGISTERED_APPS))
+            log.info("Post request to replica finished")
     REGISTRATION_LOCK.acquire()
+    log.info("Check if service exists")
     if service_name not in REGISTERED_APPS:
-        for service in REGISTERED_APPS.keys():
-            requests.post(f"http://{REGISTERED_APPS[service]['host']}:{REGISTERED_APPS[service]['port']}/new_service", json=json.dumps(REGISTERED_APPS))
+        log.info("Introduce new service")
         REGISTERED_APPS[service_name] = [{"host":request.headers.get("host"), "port":request.headers.get("port")}]
-        log.info(REGISTERED_APPS)
     else:
+        log.info("Introduce to existing service")
         REGISTERED_APPS[service_name].append({"host":request.headers.get("host"), "port":request.headers.get("port")})
+    log.info(REGISTERED_APPS)
     REGISTRATION_LOCK.release()
     return json.dumps(REGISTERED_APPS)
 
@@ -41,6 +49,7 @@ def monitor_services():
                     service_down.append([service, replica])
         [REGISTERED_APPS[service].remove(replica) for service, replica in service_down]
         [REGISTERED_APPS.pop(service, None) for service, _ in service_down if len(REGISTERED_APPS[service]) == 0 ]
+        service_down = []
         log.info(REGISTERED_APPS)
         REGISTRATION_LOCK.release()
         time.sleep(10)

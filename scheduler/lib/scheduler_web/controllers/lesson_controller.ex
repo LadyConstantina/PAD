@@ -58,13 +58,17 @@ defmodule SchedulerWeb.LessonController do
     end
   end
 
-  def create(conn, %{"lesson" => lesson_params}) do
-    with {:ok, %Lesson{} = lesson} <- Lessons.create_lesson(lesson_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/lessons/#{lesson}")
-      |> render(:show, lesson: lesson)
-    end
+  def create(conn, %{"lesson" => data, "user_id" => user_id}) do
+    lesson = Enum.fetch!(Map.keys(data),0)
+    Logger.info(Enum.fetch!(data[lesson],3))
+    lesson_obj = %{ classroom: Enum.fetch!(data[lesson],3), 
+                    lesson: lesson, 
+                    teacher: Enum.fetch!(data[lesson],2), 
+                    time: Enum.fetch!(data[lesson],1), 
+                    day: Enum.fetch!(data[lesson],0),
+                    user_id: user_id}
+    {:ok, %Lesson{} = lesson} = Scheduler.Lessons.create_lesson(lesson_obj)
+    send_resp(conn, :ok, Jason.encode!(%{"id" => lesson.id}))
   end
 
   def show(conn, %{"id" => id}) do
@@ -82,9 +86,8 @@ defmodule SchedulerWeb.LessonController do
 
   def delete(conn, %{"id" => id}) do
     lesson = Lessons.get_lesson!(id)
-
     with {:ok, %Lesson{}} <- Lessons.delete_lesson(lesson) do
-      send_resp(conn, :no_content, "")
+      send_resp(conn, :ok, "Deleted")
     end
   end
 end

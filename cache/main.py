@@ -22,12 +22,14 @@ CACHE_REGISTRY = {
 NR_OF_CACHE_SERVICES_AVAILABLE = len(CACHE_REGISTRY.keys())
 
 def register():
+    log.info("Request for register sent")
     requests.get('http://localhost:4010/', headers={"Content-type":"application/json","name":"Cache Leader","host":"localhost","port":'4020'})
-
+    log.info("Request done")
 
 def get_cache_service(key):
     cache_int = abs(hash(key)) % NR_OF_CACHE_SERVICES_AVAILABLE + 1
-    cache_next_int = cache_int + 1 % NR_OF_CACHE_SERVICES_AVAILABLE + 1
+    cache_next_int = ((cache_int + 1) % NR_OF_CACHE_SERVICES_AVAILABLE) +1
+    log.info(f"Indexes of the cache service: {cache_int} and {cache_next_int}")
     return (CACHE_REGISTRY[cache_int],CACHE_REGISTRY[cache_next_int])
 
 def get_data_from_cache(user_id, request):
@@ -39,7 +41,12 @@ def get_data_from_cache(user_id, request):
         log.info(f"Cache {cache_service_1} unavailable. Trying cache {cache_service_2}")
         NR_OF_CACHE_SERVICES_AVAILABLE -= 1
         data = cache_service_2.get(key)
-    return data
+    log.info(type(data))
+    if data != None:
+        data = data.decode("utf-8")
+    response = {"data":data}
+    log.info(response)
+    return response
 
 def save_data_in_cache(user_id,request,data):
     key = f"{request} for {user_id}".replace(" ","_")
@@ -68,6 +75,10 @@ def add_cache():
 def heartbeat():
     return json.dumps("alive")
 
+@app.route("/new_service", methods=["POST"])
+def new_service():
+    return "ok"
+
 if __name__ == "__main__":
     register()
-    app.run(host='localhost', port=4020, debug=True)
+    app.run(host='localhost', port=4020, debug=True, use_reloader=False)

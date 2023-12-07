@@ -43,19 +43,21 @@ defmodule NotionPlanner.ProjectsDataBase do
     end
 
     def store({data, src}) do
-      Agent.update(__MODULE__,&(&1 + 1))
-      id = Agent.get(__MODULE__, fn x -> x end)
+      upload('projects_database.json')
+      id = :ets.last(:projects_database) + 1
       :ets.insert(:projects_database, {id, data, src})
       update()
     end
 
     def remove(id) do
+        upload('projects_database.json')
         [{id,data,src}] = :ets.lookup(:projects_database,id)
         :ets.delete(:projects_database, id)
         update()
     end
 
     def get_all(user_id) do
+      upload('projects_database.json')
       data = :ets.match(:projects_database,{:_,:"$1",user_id})
       data
     end
@@ -87,20 +89,22 @@ defmodule NotionPlanner.NotesDataBase do
     end
 
     def store({data, src}) do
-        Agent.update(__MODULE__,&(&1 + 1))
-        id = Agent.get(__MODULE__, fn x -> x end)
+        upload('notes_database.json')
+        id = :ets.last(:notes_database) + 1
         status = :ets.insert(:notes_database, {id, data, src})
         update()
     end
 
     def remove(id) do
+        upload('notes_database.json')
         [{id,data,src}] = :ets.lookup(:notes_database,id)
         :ets.delete(:notes_database, id)
         update()
     end
 
     def get_all(user_id) do
-      list = :ets.match(:notes_database,{:_,:"$1",user_id})
-      list
+        upload('notes_database.json')
+        list = :ets.match(:notes_database,{:_,:"$1",user_id})
+        list
     end
 end

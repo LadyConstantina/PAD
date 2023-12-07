@@ -11,57 +11,6 @@ app = Flask(__name__)
 
 REGISTERED_APPS = dict()
 
-def register():
-    response = requests.get('http://localhost:4010/', headers={"Content-type":"application/json","name":"Gateway","host":"localhost","port":'4011'})
-    resp = response.json()
-    for client in resp.keys():
-        REGISTERED_APPS[client] = resp[client]
-
-def post_routing_agent(request_uri, json_data, service):
-    replica = REGISTERED_APPS[service][0]
-    host = replica["host"]
-    port = replica["port"]
-    try:
-        response = requests.post(url=f"http://{host}:{port}/{request_uri}", json=json_data, timeout=10)
-        return response
-    except:
-        log.info(f"Trying another replica of service {service}")
-    try:
-        replica = REGISTERED_APPS[service][1]
-        host = replica["host"]
-        port = replica["port"]
-        response = requests.post(url=f"http://{host}:{port}/{request_uri}", json=json_data, timeout=10)
-    except:
-        response = Response()
-        response.status_code = 500
-        response.code = "expired"
-        response.error_type = "expired"
-        response._content = "Too many rerouts!"
-    
-    return response
-
-def get_routing_agent(request_uri, service):
-    replica = REGISTERED_APPS[service][0]
-    host = replica["host"]
-    port = replica["port"]
-    try:
-        response = requests.get(url=f"http://{host}:{port}/{request_uri}", timeout=10)
-        return response
-    except:
-        log.info(f"Trying another replica of service {service}")
-    try:
-        replica = REGISTERED_APPS[service][1]
-        host = replica["host"]
-        port = replica["port"]
-        response = requests.get(url=f"http://{host}:{port}/{request_uri}", timeout=10)
-    except:
-        response = Response()
-        response.status_code = 500
-        response.code = "expired"
-        response.error_type = "expired"
-        response._content = "Too many rerouts!"
-    
-    return response
 
 @app.route('/heartbeat', methods=['GET'])
 def heartbeat():
@@ -69,9 +18,8 @@ def heartbeat():
 
 @app.route('/new_service', methods=["POST"])
 def add_new_service():
-    resp = request.json
-    for client in resp:
-        REGISTERED_APPS[client] = resp[client]
+    REGISTERED_APPS = request.json
+    return "ok"
 
 @app.route('/register', methods=['POST'])
 def register_client():
@@ -89,8 +37,7 @@ def login_client():
         return "Service not available"
     body = request.json
     response = post_routing_agent("api/login", body, "Scheduler")
-    client_tocken = response.json()
-    log.info(client_tocken)
+    client_tocken = response.content
     return client_tocken
 
 @app.route('/schedule', methods=['POST'])
@@ -105,16 +52,18 @@ def create_schedule():
 def get_schedule():
     body = request.json
     user_id = body["user_id"]
-    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
-    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
-    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /schedule"}))
+    host_cache = REGISTERED_APPS["Cache Leader"][0]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"][0]["port"]
+    response = requests.get(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":"GET /schedule"})
+    log.info(response.content)
+    cache_data = response.json()["data"]
     if cache_data == None:
         if "Scheduler" not in REGISTERED_APPS.keys():
             return "Service not available"
         response = get_routing_agent(f"api/schedule?user_id={user_id}","Scheduler")
         data = response.json()
-        data = {"schedule":response.json()}
-        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /schedule","data":data}))
+        data = {"schedule":data}
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":"GET /schedule","data":data})
         return data
     return cache_data
 
@@ -123,16 +72,17 @@ def get_schedule_for_day():
     body = request.json
     user_id = body["user_id"]
     day = body["day"]
-    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
-    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
-    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":f"GET /schedule/day_{day}"}))
+    host_cache = REGISTERED_APPS["Cache Leader"][0]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"][0]["port"]
+    response = requests.get(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":f"GET /schedule/day_{day}"})
+    cache_data = response.json()["data"]
     if cache_data == None:
         if "Scheduler" not in REGISTERED_APPS.keys():
             return "Service not available"
         response = get_routing_agent(f"api/schedule/day?user_id={user_id}&day={day}","Scheduler")
         data = response.json()
         data = {"schedule":response.json()}
-        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":f"GET /schedule/day_{day}","data":data}))
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":f"GET /schedule/day_{day}","data":data})
         return data
     return cache_data
 
@@ -140,16 +90,17 @@ def get_schedule_for_day():
 def get_schedule_for_today():
     body = request.json
     user_id = body["user_id"]
-    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
-    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
-    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /schedule/today"}))
+    host_cache = REGISTERED_APPS["Cache Leader"][0]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"][0]["port"]
+    response = requests.get(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":"GET /schedule/today"})
+    cache_data = response.json()["data"]
     if cache_data == None:
         if "Scheduler" not in REGISTERED_APPS.keys():
             return "Service not available"
         response = get_routing_agent(f"api/schedule/today?user_id={user_id}","Scheduler")
         data = response.json()
         data = {"schedule":response.json()}
-        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /schedule/today","data":data}))
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":"GET /schedule/today","data":data})
         return data
     return cache_data
 
@@ -165,16 +116,17 @@ def create_notes():
 def get_all_notes():
     body = request.json
     user_id = body["user_id"]
-    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
-    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
-    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /notes"}))
+    host_cache = REGISTERED_APPS["Cache Leader"][0]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"][0]["port"]
+    response = requests.get(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":"GET /notes"})
+    cache_data = response.json()["data"]
     if cache_data == None:
         if "Planner" not in REGISTERED_APPS.keys():
             return "Service not available"
         response = get_routing_agent(f"api/notes?user_id={user_id}","Planner")
         data = response.json()
         data = {"notes":response.json()}
-        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /notes","data":data}))
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":"GET /notes","data":data})
         return data
     return cache_data
 
@@ -183,16 +135,17 @@ def get_exam_notes():
     body = request.json
     user_id = body["user_id"]
     subject = body["subject"]
-    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
-    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
-    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":f"GET /notes_{subject}"}))
+    host_cache = REGISTERED_APPS["Cache Leader"][0]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"][0]["port"]
+    response = requests.get(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":f"GET /notes_{subject}"})
+    cache_data = response.json()["data"]
     if cache_data == None:
         if "Planner" not in REGISTERED_APPS.keys():
             return "Service not available"
         response = get_routing_agent(f"api/exam?user_id={user_id}&subject={subject}","Planner")
         data = response.json()
         data = {"notes":response.json()}
-        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":f"GET /notes_{subject}","data":data}))
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":f"GET /notes_{subject}","data":data})
         return data
     return cache_data
 
@@ -200,8 +153,6 @@ def get_exam_notes():
 def create_projects():
     if "Planner" not in REGISTERED_APPS.keys():
         return "Service not available"
-    host = REGISTERED_APPS["Planner"]["host"]
-    port = REGISTERED_APPS["Planner"]["port"]
     body = request.json
     response = post_routing_agent("api/project", body, "Planner")
     return response.json()
@@ -210,21 +161,133 @@ def create_projects():
 def get_all_projects():
     body = request.json
     user_id = body["user_id"]
-    host_cache = REGISTERED_APPS["Cache Leader"]["host"]
-    port_cache = REGISTERED_APPS["Cache Leader"]["port"]
-    cache_data = requests.get(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /project"}))
+    host_cache = REGISTERED_APPS["Cache Leader"][0]["host"]
+    port_cache = REGISTERED_APPS["Cache Leader"][0]["port"]
+    response = requests.get(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":"GET /project"})
+    cache_data = response.json()["data"]
     if cache_data == None:
         if "Planner" not in REGISTERED_APPS.keys():
             return "Service not available"
-        host = REGISTERED_APPS["Planner"]["host"]
-        port = REGISTERED_APPS["Planner"]["port"]
         response = get_routing_agent(f"api/project?user_id={user_id}","Planner")
         data = response.json()
         data = {"project":response.json()}
-        requests.post(url = f"http://{host_cache}:{port_cache}/", json=json.dumps({"user_id":user_id,"request":"GET /project","data":data}))
+        requests.post(url = f"http://{host_cache}:{port_cache}/", json={"user_id":user_id,"request":"GET /project","data":data})
         return data
     return cache_data
 
+@app.route('/semestrial_project', methods=["POST"])
+def saga_transaction_for_project():
+    body = request.json
+    response_1 = post_routing_agent("api/lesson", body, "Scheduler")
+    if response_1.status_code == 200:
+        response_2 = post_routing_agent("api/project", body, "Planner")
+        if response_2.status_code == 200:
+            return f"Transaction successful! \n result request 1: {response_1.content} \n result request 1: {response_2.content}"
+        else:
+            response_3 = delete_routing_agent("api/lesson", response_1.json, "Scheduler")
+            return response_3.content
+    return response_1.content
+
+@app.before_first_request
+def register():
+    log.info("Sending register request")
+    response = requests.get('http://localhost:4010/', headers={"Content-type":"application/json","name":"Gateway","host":"localhost","port":'4011'})
+    log.info(f"Got response {response}")
+    resp = response.json()
+    for client in resp.keys():
+        REGISTERED_APPS[client] = resp[client]
+
+def post_routing_agent(request_uri, json_data, service):
+    if service not in REGISTERED_APPS.keys():
+        response = Response()
+        response.status_code = 404
+        response.code = "expired"
+        response.error_type = "expired"
+        response._content = "No service available"
+        return response
+    replica = REGISTERED_APPS[service][0]
+    host = replica["host"]
+    port = replica["port"]
+    try:
+        response = requests.post(url=f"http://{host}:{port}/{request_uri}", json=json_data, timeout=30)
+        return response
+    except:
+        log.info(f"Trying another replica of service {service}")
+    try:
+        replica = REGISTERED_APPS[service][1]
+        host = replica["host"]
+        port = replica["port"]
+        response = requests.post(url=f"http://{host}:{port}/{request_uri}", json=json_data, timeout=30)
+    except:
+        response = Response()
+        response.status_code = 500
+        response.code = "expired"
+        response.error_type = "expired"
+        response._content = f"Too many rerouts! Service {service} might be unavailable!"
+    
+    return response
+
+def delete_routing_agent(request_uri, json_data, service):
+    if service not in REGISTERED_APPS.keys():
+        response = Response()
+        response.status_code = 404
+        response.code = "expired"
+        response.error_type = "expired"
+        response._content = "No service available"
+        return response
+    replica = REGISTERED_APPS[service][0]
+    host = replica["host"]
+    port = replica["port"]
+    try:
+        response = requests.delete(url=f"http://{host}:{port}/{request_uri}", json=json_data, timeout=30)
+        return response
+    except:
+        log.info(f"Trying another replica of service {service}")
+    try:
+        replica = REGISTERED_APPS[service][1]
+        host = replica["host"]
+        port = replica["port"]
+        response = requests.delete(url=f"http://{host}:{port}/{request_uri}", json=json_data, timeout=10)
+    except:
+        response = Response()
+        response.status_code = 500
+        response.code = "expired"
+        response.error_type = "expired"
+        response._content = f"Too many rerouts! Service {service} might be unavailable!"
+    
+    return response
+
+def get_routing_agent(request_uri, service):
+    if service not in REGISTERED_APPS.keys():
+        response = Response()
+        response.status_code = 404
+        response.code = "expired"
+        response.error_type = "expired"
+        response._content = "No service available"
+        return response
+    replica = REGISTERED_APPS[service][0]
+    host = replica["host"]
+    port = replica["port"]
+    response = None
+    try:
+        response = requests.get(url=f"http://{host}:{port}/{request_uri}", timeout=10)
+        return response
+    except:
+        log.info(f"Trying another replica of service {service}")
+    try:
+        replica = REGISTERED_APPS[service][1]
+        host = replica["host"]
+        port = replica["port"]
+        response = requests.get(url=f"http://{host}:{port}/{request_uri}", timeout=10)
+    except:
+        response = Response()
+        response.status_code = 500
+        response.code = "expired"
+        response.error_type = "expired"
+        response._content = f"Too many rerouts! Service {service} might be unavailable!"
+    
+    return response
+
+
 if __name__ == "__main__":
-    register()
     app.run(host='localhost', port=4011, debug=True)
